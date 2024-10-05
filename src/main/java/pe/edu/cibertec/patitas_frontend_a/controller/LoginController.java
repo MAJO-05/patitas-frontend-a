@@ -17,7 +17,7 @@ import pe.edu.cibertec.patitas_frontend_a.viewmodel.LoginModel;
 public class LoginController {
 
     @Autowired
-    RestTemplate restTemplate;
+    RestTemplate restTemplateAutenticacion;
 
     @GetMapping("/inicio")
     public String inicio(Model model) {
@@ -44,28 +44,33 @@ public class LoginController {
         }
 
         try {
-            String endpoint = "http://localhost:8081/autenticacion/login";
+
+            // Invocar servicio de autenticación
             LoginRequestDTO loginRequestDTO = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
-            LoginResponseDTO loginResponseDTO = restTemplate.postForObject(endpoint, loginRequestDTO, LoginResponseDTO.class);
+            LoginResponseDTO loginResponseDTO = restTemplateAutenticacion.postForObject("/login", loginRequestDTO, LoginResponseDTO.class);
 
             if (loginResponseDTO.codigo().equals("00")){
 
                 LoginModel loginModel = new LoginModel("00", "", loginResponseDTO.nombreUsuario());
                 model.addAttribute("loginModel", loginModel);
                 return "principal";
+
             } else {
-                LoginModel loginModel = new LoginModel("02", "Error:Autenticacion Fallida", "");
+
+                LoginModel loginModel = new LoginModel("02", "Error: Autenticación fallida", "");
                 model.addAttribute("loginModel", loginModel);
                 return "inicio";
+
             }
-        }catch (Exception e){
-            LoginModel loginModel = new LoginModel("99", "Error: Ocurrio un problema en la autenticación", "");
+
+        } catch(Exception e) {
+
+            LoginModel loginModel = new LoginModel("99", "Error: Ocurrió un problema en la autenticación", "");
             model.addAttribute("loginModel", loginModel);
             System.out.println(e.getMessage());
             return "inicio";
+
         }
-
-
 
     }
 
